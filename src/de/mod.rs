@@ -183,7 +183,7 @@ where
     where
         V: serde::de::Visitor<'de>,
     {
-        unimplemented!()
+        Err(Error::unsupported_type("any"))
     }
 
     serde::forward_to_deserialize_any! {
