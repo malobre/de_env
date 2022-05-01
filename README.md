@@ -1,10 +1,10 @@
-# 🦀 de-env &emsp;
+# 🦀 `de_env` &emsp;
 
 **De**serialize **env**ironment variables through serde.
 
 ---
 
-[Documentation](https://docs.rs/de-env) | [Crates.io](https://crates.io/crates/de-env)
+[Documentation](https://docs.rs/de_env) | [Crates.io](https://crates.io/crates/de_env)
 
 ## Example
 
