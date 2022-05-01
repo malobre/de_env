@@ -53,7 +53,7 @@ Assuming we have a `LEVEL` environment variable set to `HIGH`, `MEDIUM` or
 ```rust,no_run
 #[derive(serde::Deserialize, Debug)]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-struct Level {
+enum Level {
     High,
     Medium,
     Low
