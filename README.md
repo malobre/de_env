@@ -78,5 +78,4 @@ println!("{pool:#?}");
 - Non-unit enum variants
 - Tuples
 - Sequences
-- Options
 - Byte Arrays

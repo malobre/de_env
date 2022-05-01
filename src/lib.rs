@@ -47,4 +47,19 @@ mod tests {
         )
         .unwrap();
     }
+
+    #[test]
+    fn option() {
+        #[derive(serde::Deserialize)]
+        struct Test {
+            a: Option<u8>,
+            b: Option<u8>,
+        }
+
+        let test: Test =
+            crate::from_iter([(String::from("a"), String::from("12"))].into_iter()).unwrap();
+
+        assert_eq!(test.a, Some(12));
+        assert_eq!(test.b, None);
+    }
 }

@@ -98,6 +98,13 @@ impl<'de> serde::de::Deserializer<'de> for Value {
         visitor.visit_newtype_struct(self)
     }
 
+    fn deserialize_option<V>(self, visitor: V) -> Result<V::Value>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        visitor.visit_some(self)
+    }
+
     convert_into_string_and_parse! {
         u8 u16 u32 u64 u128 i8 i16 i32 i64 i128 f32 f64
     }
@@ -112,13 +119,6 @@ impl<'de> serde::de::Deserializer<'de> for Value {
         V: serde::de::Visitor<'de>,
     {
         Err(Error::unsupported_type("identifier"))
-    }
-
-    fn deserialize_option<V>(self, _visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("option"))
     }
 
     fn deserialize_unit<V>(self, _visitor: V) -> Result<V::Value>
