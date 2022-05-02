@@ -1,10 +1,13 @@
-# 🦀 `de_env` &emsp;
+# 🦀 `de_env`
 
-**De**serialize **env**ironment variables through serde.
+_**De**serialize **env**ironment variables through serde._
 
 ---
 
-[Documentation](https://docs.rs/de_env) | [Crates.io](https://crates.io/crates/de_env)
+You may be looking for:
+
+- [API Documentation](https://docs.rs/de_env)
+- [Crates.io](https://crates.io/crates/de_env)
 
 ## Example
 
@@ -25,7 +28,7 @@ println!("{config:#?}");
 
 ## Boolean parsing
 
-**Boolean deserialization is case-insensitive.**
+**Boolean parsing is case-insensitive.**
 
 If the `truthy-falsy` feature is enabled (default):
 
