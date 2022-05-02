@@ -14,7 +14,7 @@ mod value;
 /// Deserialize an instance of `T` from the environment variables of the current process.
 ///
 /// # Example
-/// _Note: This assumes that you have set the specified environment variables._
+/// Assuming we have a `LOG` and `PORT` environment variable:
 /// ```rust
 /// #[derive(serde::Deserialize, Debug)]
 /// #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
