@@ -40,12 +40,6 @@ impl Error {
     }
 }
 
-impl serde::de::Error for Error {
-    fn custom<T: Display>(msg: T) -> Self {
-        Self::new(ErrorCode::Message(msg.to_string().into_boxed_str()))
-    }
-}
-
 impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self.0.as_ref() {
@@ -69,12 +63,21 @@ impl Display for Error {
 
 impl std::error::Error for Error {}
 
+#[doc(hidden)]
+impl serde::de::Error for Error {
+    fn custom<T: Display>(msg: T) -> Self {
+        Self::new(ErrorCode::Message(msg.to_string().into_boxed_str()))
+    }
+}
+
+#[doc(hidden)]
 impl From<ParseIntError> for Error {
     fn from(error: ParseIntError) -> Self {
         Self::new(ErrorCode::InvalidInteger(error))
     }
 }
 
+#[doc(hidden)]
 impl From<ParseFloatError> for Error {
     fn from(error: ParseFloatError) -> Self {
         Self::new(ErrorCode::InvalidFloat(error))
