@@ -214,7 +214,10 @@ mod tests {
         let truthy = ["true", "TRUE"];
 
         for value in truthy {
-            assert_eq!(bool::deserialize(Value(OsString::from(value))), Ok(true));
+            assert!(matches!(
+                bool::deserialize(Value(OsString::from(value))),
+                Ok(true)
+            ));
         }
 
         #[cfg(feature = "truthy-falsy")]
@@ -226,7 +229,10 @@ mod tests {
         let falsy = ["false", "FALSE"];
 
         for value in falsy {
-            assert_eq!(bool::deserialize(Value(OsString::from(value))), Ok(false));
+            assert!(matches!(
+                bool::deserialize(Value(OsString::from(value))),
+                Ok(false)
+            ));
         }
 
         assert!(bool::deserialize(Value(OsString::from("gibberish"))).is_err());
@@ -243,15 +249,15 @@ mod tests {
             StructVariant { field: bool },
         }
 
-        assert_eq!(
+        assert!(matches!(
             Switch::deserialize(Value(OsString::from("ON"))),
             Ok(Switch::On)
-        );
+        ));
 
-        assert_eq!(
+        assert!(matches!(
             Switch::deserialize(Value(OsString::from("OFF"))),
             Ok(Switch::Off)
-        );
+        ));
 
         assert!(Switch::deserialize(Value(OsString::from("NEW_TYPE_VARIANT"))).is_err());
         assert!(Switch::deserialize(Value(OsString::from("STRUCT_VARIANT"))).is_err());
@@ -263,9 +269,9 @@ mod tests {
         #[derive(serde::Deserialize, Debug, PartialEq)]
         struct NewType(u8);
 
-        assert_eq!(
+        assert!(matches!(
             NewType::deserialize(Value(OsString::from("123"))),
             Ok(NewType(123))
-        );
+        ));
     }
 }

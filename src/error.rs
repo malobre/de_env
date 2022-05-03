@@ -8,11 +8,11 @@ use std::{
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// Represent an error that may arise when deserializing.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone)]
 #[must_use]
 pub struct Error(Box<ErrorCode>);
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone)]
 enum ErrorCode {
     Message(Box<str>),
     UnsupportedType(&'static str),
