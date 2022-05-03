@@ -77,7 +77,7 @@ println!("{pool:#?}");
 
 - Nested structs
 - Nested enums
-- Nested Maps
+- Nested maps
 - Non-unit enum variants
 - Tuples
 - Sequences
