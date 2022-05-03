@@ -240,13 +240,13 @@ mod tests {
 
     #[test]
     fn deserialize_enum() {
-        #[derive(serde::Deserialize, Debug, PartialEq)]
+        #[derive(serde::Deserialize, Debug)]
         #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
         enum Switch {
             On,
             Off,
             NewTypeVariant(bool),
-            StructVariant { field: bool },
+            StructVariant { _field: bool },
         }
 
         assert!(matches!(
