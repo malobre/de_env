@@ -26,7 +26,18 @@ let config: Config = de_env::from_env().unwrap();
 println!("{config:#?}");
 ```
 
-## Boolean parsing
+## Primitives
+
+### Strings & chars
+
+The input is checked for UTF-8 validity and returned as is.
+
+### Numbers
+
+If the input is valid Unicode, integers and floats are parsed with their
+respective `FromStr` implementations.
+
+### Booleans
 
 **Boolean parsing is case-insensitive.**
 
@@ -46,7 +57,7 @@ If the `truthy-falsy` feature is enabled (default):
 If the `truthy-falsy` feature is disabled, only `true` and `false` are
 considered valid booleans.
 
-## Enum
+## Enums
 
 **Only unit variants can be deserialized.**
 
