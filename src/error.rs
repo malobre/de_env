@@ -9,7 +9,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// Represent an error that may arise when deserializing.
 #[derive(Debug, Clone)]
-#[must_use]
 pub struct Error(Box<ErrorCode>);
 
 #[derive(Debug, Clone)]
