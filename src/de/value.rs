@@ -43,7 +43,7 @@ macro_rules! convert_into_string_and_parse {
 impl<'de> serde::de::Deserializer<'de> for Value {
     type Error = Error;
 
-    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value>
+    fn deserialize_string<V>(self, visitor: V) -> Result<V::Value>
     where
         V: serde::de::Visitor<'de>,
     {
@@ -51,7 +51,29 @@ impl<'de> serde::de::Deserializer<'de> for Value {
             .into_string()
             .map_err(Error::invalid_unicode)?
             .into_deserializer()
-            .deserialize_any(visitor)
+            .deserialize_string(visitor)
+    }
+
+    fn deserialize_str<V>(self, visitor: V) -> Result<V::Value>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0
+            .into_string()
+            .map_err(Error::invalid_unicode)?
+            .into_deserializer()
+            .deserialize_str(visitor)
+    }
+
+    fn deserialize_char<V>(self, visitor: V) -> Result<V::Value>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        self.0
+            .into_string()
+            .map_err(Error::invalid_unicode)?
+            .into_deserializer()
+            .deserialize_char(visitor)
     }
 
     fn deserialize_bool<V>(self, visitor: V) -> Result<V::Value>
@@ -105,93 +127,20 @@ impl<'de> serde::de::Deserializer<'de> for Value {
         visitor.visit_some(self)
     }
 
+    fn deserialize_ignored_any<V>(self, visitor: V) -> Result<V::Value>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        visitor.visit_unit()
+    }
+
     convert_into_string_and_parse! {
         u8 u16 u32 u64 u128 i8 i16 i32 i64 i128 f32 f64
     }
 
-    serde::forward_to_deserialize_any! {
-        char str string
-        ignored_any
-    }
-
-    fn deserialize_identifier<V>(self, _visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("identifier"))
-    }
-
-    fn deserialize_unit<V>(self, _visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("unit"))
-    }
-
-    fn deserialize_seq<V>(self, _visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("seq"))
-    }
-
-    fn deserialize_map<V>(self, _visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("map"))
-    }
-
-    fn deserialize_struct<V>(
-        self,
-        _name: &'static str,
-        _fields: &'static [&'static str],
-        _visitor: V,
-    ) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("struct"))
-    }
-
-    fn deserialize_tuple_struct<V>(
-        self,
-        _name: &'static str,
-        _len: usize,
-        _visitor: V,
-    ) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("tuple struct"))
-    }
-
-    fn deserialize_unit_struct<V>(self, _name: &'static str, _visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("unit struct"))
-    }
-
-    fn deserialize_tuple<V>(self, _len: usize, _visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("tuple"))
-    }
-
-    fn deserialize_bytes<V>(self, _visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("bytes"))
-    }
-
-    fn deserialize_byte_buf<V>(self, _visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("byte_buf"))
+    crate::de::util::unsupported_types! {
+        bytes byte_buf unit unit_struct seq tuple
+        tuple_struct map struct identifier any
     }
 }
 

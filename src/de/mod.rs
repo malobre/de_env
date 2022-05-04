@@ -9,6 +9,7 @@ use crate::{Error, Result};
 use self::{key::Key, value::Value};
 
 mod key;
+mod util;
 mod value;
 
 /// Deserialize an instance of `T` from the environment variables of the current process.
@@ -180,56 +181,20 @@ where
 {
     type Error = Error;
 
-    fn deserialize_map<V>(self, visitor: V) -> Result<V::Value>
+    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value>
     where
         V: serde::de::Visitor<'de>,
     {
         visitor.visit_map(&mut self.0)
     }
 
-    fn deserialize_struct<V>(
-        self,
-        _name: &'static str,
-        _fields: &'static [&'static str],
-        visitor: V,
-    ) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        self.deserialize_map(visitor)
-    }
-
-    fn deserialize_enum<V>(
-        self,
-        _name: &'static str,
-        _variants: &'static [&'static str],
-        visitor: V,
-    ) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        self.deserialize_map(visitor)
-    }
-
-    fn deserialize_newtype_struct<V>(self, _name: &'static str, visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        visitor.visit_newtype_struct(self)
-    }
-
-    fn deserialize_any<V>(self, _visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        Err(Error::unsupported_type("any"))
-    }
-
     serde::forward_to_deserialize_any! {
-        bool u8 u16 u32 u64 i8 i16 i32 i64 f32 f64 char str string
-        unit seq
-        bytes byte_buf
-        unit_struct tuple_struct
-        identifier tuple ignored_any option
+        newtype_struct map struct enum ignored_any
+    }
+
+    util::unsupported_types! {
+        bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
+        bytes byte_buf option unit unit_struct seq tuple
+        tuple_struct identifier
     }
 }
