@@ -1,6 +1,6 @@
 [package]
 name = "de_env"
-version = "1.0.0-beta.3"
+version = "1.0.0-rc"
 description = "Deserialize environment variables through serde"
 authors = ["Maël Obréjan <mael.obrejan@protonmail.com>"]
 edition = "2021"
