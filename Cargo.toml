@@ -1,7 +1,7 @@
 [package]
 name = "de_env"
 version = "1.0.0-rc.1"
-description = "Deserialize environment variables through serde"
+description = "Deserialize environment variables into a struct"
 authors = ["Maël Obréjan <mael.obrejan@protonmail.com>"]
 edition = "2021"
 license = "MIT"

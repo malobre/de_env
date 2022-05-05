@@ -1,5 +1,4 @@
-`de_env` helps you easily **de**serialize **env**ironment variables to a struct,
-a map or a seq (array, `Vec`, etc).
+`de_env` helps you easily **de**serialize **env**ironment variables into a struct.
 
 ## Example
 

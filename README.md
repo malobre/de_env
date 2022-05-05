@@ -1,6 +1,6 @@
 # 🦀 `de_env`
 
-_**De**serialize **env**ironment variables through serde._
+_**De**serialize **env**ironment variables into a struct._
 
 ---
 

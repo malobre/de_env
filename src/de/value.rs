@@ -158,6 +158,7 @@ impl<'de> serde::de::Deserializer<'de> for Value<'de> {
         visitor.visit_some(self)
     }
 
+    // Required for skipping fields when visiting maps.
     fn deserialize_ignored_any<V>(self, visitor: V) -> Result<V::Value>
     where
         V: serde::de::Visitor<'de>,

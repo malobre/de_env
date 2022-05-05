@@ -1,6 +1,6 @@
 //! # `de_env`
 //!
-//! _**De**serialize **env**ironment variables through serde._
+//! _**De**serialize **env**ironment variables into a struct._
 //!
 //! ---
 //!
@@ -11,14 +11,14 @@
 //!
 //! ## Example
 //!
-//! Assuming we have a `LOG` and `PORT` environment variable:
+//! Assuming we have a `TIMEOUT` and `HOST` environment variable:
 //!
 //! ```rust,no_run
 //! #[derive(serde::Deserialize, Debug)]
 //! #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 //! struct Config {
-//!     log: String,
-//!     port: u16
+//!     timeout: u16,
+//!     host: std::net::IpAddr,
 //! }
 //!
 //! let config: Config = de_env::from_env()?;
@@ -29,14 +29,10 @@
 //!
 //! ## Primitives
 //!
-//! ### Strings & chars
-//!
-//! The input is checked for UTF-8 validity and returned as is.
-//!
 //! ### Numbers
 //!
 //! If the input is valid Unicode, integers and floats are parsed with their
-//! respective `FromStr` implementations.
+//! respective [`FromStr`](std::str::FromStr) implementations.
 //!
 //! ### Booleans
 //!
@@ -83,16 +79,6 @@
 //! println!("{config:#?}");
 //! # Ok::<(), de_env::Error>(())
 //! ```
-//!
-//! ## Unsupported types
-//!
-//! - Nested structs
-//! - Nested enums
-//! - Nested maps
-//! - Nested sequences
-//! - Non-unit enum variants
-//! - Tuples
-//! - Byte Arrays
 
 mod de;
 mod error;
