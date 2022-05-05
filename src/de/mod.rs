@@ -95,7 +95,7 @@ where
 /// # std::env::set_var("PORT", "2345");
 /// let vars = std::env::vars_os().filter(|(name, _value)| name == "LOG" || name == "PORT");
 ///
-/// let config: Config = de_env::from_iter(vars).unwrap();
+/// let config: Config = de_env::from_iter(vars)?;
 ///
 /// println!("{config:#?}");
 /// # Ok::<(), de_env::Error>(())
