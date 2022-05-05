@@ -27,15 +27,8 @@ fn deny_unknown_fields() {
         b: u8,
     }
 
-    let _test: Test = crate::from_iter(
-        [
-            (String::from("a"), String::from("12")),
-            (String::from("b"), String::from("34")),
-            (String::from("c"), String::from("56")),
-        ]
-        .into_iter(),
-    )
-    .unwrap();
+    let _test: Test =
+        crate::from_iter([("a", "12"), ("b", "34"), ("c", "56")].into_iter()).unwrap();
 }
 
 #[test]
@@ -46,8 +39,7 @@ fn option() {
         b: Option<u8>,
     }
 
-    let test: Test =
-        crate::from_iter([(String::from("a"), String::from("12"))].into_iter()).unwrap();
+    let test: Test = crate::from_iter([("a", "12")].into_iter()).unwrap();
 
     assert_eq!(test.a, Some(12));
     assert_eq!(test.b, None);

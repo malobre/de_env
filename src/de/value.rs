@@ -177,8 +177,6 @@ impl<'de> serde::de::Deserializer<'de> for Value<'de> {
 
 #[cfg(test)]
 mod tests {
-    use std::ffi::OsStr;
-
     use serde::Deserialize;
 
     use super::Value;
@@ -194,10 +192,7 @@ mod tests {
         let truthy = ["true", "TRUE"];
 
         for value in truthy {
-            assert!(matches!(
-                bool::deserialize(Value::from(OsStr::new(value))),
-                Ok(true)
-            ));
+            assert!(matches!(bool::deserialize(Value::from(value)), Ok(true)));
         }
 
         #[cfg(feature = "truthy-falsy")]
@@ -209,13 +204,10 @@ mod tests {
         let falsy = ["false", "FALSE"];
 
         for value in falsy {
-            assert!(matches!(
-                bool::deserialize(Value::from(OsStr::new(value))),
-                Ok(false)
-            ));
+            assert!(matches!(bool::deserialize(Value::from(value)), Ok(false)));
         }
 
-        assert!(bool::deserialize(Value::from(OsStr::new("gibberish"))).is_err());
+        assert!(bool::deserialize(Value::from("gibberish")).is_err());
     }
 
     #[test]
@@ -230,18 +222,18 @@ mod tests {
         }
 
         assert!(matches!(
-            Switch::deserialize(Value::from(OsStr::new("ON"))),
+            Switch::deserialize(Value::from("ON")),
             Ok(Switch::On)
         ));
 
         assert!(matches!(
-            Switch::deserialize(Value::from(OsStr::new("OFF"))),
+            Switch::deserialize(Value::from("OFF")),
             Ok(Switch::Off)
         ));
 
-        assert!(Switch::deserialize(Value::from(OsStr::new("NEW_TYPE_VARIANT"))).is_err());
-        assert!(Switch::deserialize(Value::from(OsStr::new("STRUCT_VARIANT"))).is_err());
-        assert!(Switch::deserialize(Value::from(OsStr::new("gibberish"))).is_err());
+        assert!(Switch::deserialize(Value::from("NEW_TYPE_VARIANT")).is_err());
+        assert!(Switch::deserialize(Value::from("STRUCT_VARIANT")).is_err());
+        assert!(Switch::deserialize(Value::from("gibberish")).is_err());
     }
 
     #[test]
@@ -250,7 +242,7 @@ mod tests {
         struct NewType(u8);
 
         assert!(matches!(
-            NewType::deserialize(Value::from(OsStr::new("123"))),
+            NewType::deserialize(Value::from("123")),
             Ok(NewType(123))
         ));
     }
