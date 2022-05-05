@@ -13,7 +13,7 @@
 //!
 //! Assuming we have a `TIMEOUT` and `HOST` environment variable:
 //!
-//! ```rust,no_run
+//! ```rust
 //! #[derive(serde::Deserialize, Debug)]
 //! #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 //! struct Config {
@@ -21,6 +21,8 @@
 //!     host: std::net::IpAddr,
 //! }
 //!
+//! # std::env::set_var("TIMEOUT", "12");
+//! # std::env::set_var("HOST", "127.0.0.1");
 //! let config: Config = de_env::from_env()?;
 //!
 //! println!("{config:#?}");
@@ -60,7 +62,7 @@
 //!
 //! Assuming we have a `LOG_LEVEL` environment variable set to `INFO` or `WARN`:
 //!
-//! ```rust,no_run
+//! ```rust
 //! #[derive(serde::Deserialize, Debug)]
 //! #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 //! enum Level {
@@ -74,6 +76,7 @@
 //!     log_level: Level,
 //! }
 //!
+//! # std::env::set_var("LOG_LEVEL", "INFO");
 //! let config: Config = de_env::from_env()?;
 //!
 //! println!("{config:#?}");
