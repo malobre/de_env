@@ -153,13 +153,20 @@ where
         visitor.visit_map(&mut self.0)
     }
 
+    fn deserialize_seq<V>(self, visitor: V) -> Result<V::Value>
+    where
+        V: serde::de::Visitor<'de>
+    {
+        visitor.visit_seq(&mut self.0)
+    }
+
     serde::forward_to_deserialize_any! {
-        newtype_struct map struct enum ignored_any
+        struct map newtype_struct ignored_any
     }
 
     util::unsupported_types! {
         bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
-        bytes byte_buf option unit unit_struct seq tuple
-        tuple_struct identifier
+        bytes byte_buf option unit unit_struct tuple
+        tuple_struct identifier enum
     }
 }
