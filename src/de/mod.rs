@@ -24,13 +24,12 @@ mod value;
 ///     port: u16
 /// }
 ///
-/// fn main() {
-/// #   std::env::set_var("LOG", "some value");
-/// #   std::env::set_var("PORT", "2345");
-///     let config: Config = de_env::from_env().unwrap();
+/// # std::env::set_var("LOG", "some value");
+/// # std::env::set_var("PORT", "2345");
+/// let config: Config = de_env::from_env()?;
 ///
-///     println!("{config:#?}");
-/// }
+/// println!("{config:#?}");
+/// # Ok::<(), de_env::Error>(())
 /// ```
 ///
 /// # Errors
@@ -58,13 +57,12 @@ where
 ///     port: u16
 /// }
 ///
-/// fn main() {
-/// #   std::env::set_var("PREFIX_LOG", "some value");
-/// #   std::env::set_var("PREFIX_PORT", "2345");
-///     let config: Config = de_env::from_env_prefixed("PREFIX_").unwrap();
+/// # std::env::set_var("PREFIX_LOG", "some value");
+/// # std::env::set_var("PREFIX_PORT", "2345");
+/// let config: Config = de_env::from_env_prefixed("PREFIX_")?;
 ///
-///     println!("{config:#?}");
-/// }
+/// println!("{config:#?}");
+/// # Ok::<(), de_env::Error>(())
 /// ```
 ///
 /// # Errors
@@ -95,16 +93,15 @@ where
 ///     port: u16
 /// }
 ///
-/// fn main() {
-/// #   std::env::set_var("LOG", "some value");
-/// #   std::env::set_var("PORT", "2345");
-///     // You can use any iterator over a `(String, String)` tuple.
-///     let vars = std::env::vars().filter(|(name, _value)| name == "LOG" || name == "PORT");
+/// # std::env::set_var("LOG", "some value");
+/// # std::env::set_var("PORT", "2345");
+/// // You can use any iterator over a `(String, String)` tuple.
+/// let vars = std::env::vars().filter(|(name, _value)| name == "LOG" || name == "PORT");
 ///
-///     let config: Config = de_env::from_iter(vars).unwrap();
+/// let config: Config = de_env::from_iter(vars)?;
 ///
-///     println!("{config:#?}");
-/// }
+/// println!("{config:#?}");
+/// # Ok::<(), de_env::Error>(())
 /// ```
 ///
 /// # Errors
@@ -137,16 +134,15 @@ where
 ///     port: u16
 /// }
 ///
-/// fn main() {
-/// #   std::env::set_var("LOG", "some value");
-/// #   std::env::set_var("PORT", "2345");
-///     // You can use any iterator over a `(OsString, OsString)` tuple.
-///     let vars = std::env::vars_os().filter(|(name, _value)| name == "LOG" || name == "PORT");
+/// # std::env::set_var("LOG", "some value");
+/// # std::env::set_var("PORT", "2345");
+/// // You can use any iterator over a `(OsString, OsString)` tuple.
+/// let vars = std::env::vars_os().filter(|(name, _value)| name == "LOG" || name == "PORT");
 ///
-///     let config: Config = de_env::from_iter_os(vars).unwrap();
+/// let config: Config = de_env::from_iter_os(vars).unwrap();
 ///
-///     println!("{config:#?}");
-/// }
+/// println!("{config:#?}");
+/// # Ok::<(), de_env::Error>(())
 /// ```
 ///
 /// # Errors
