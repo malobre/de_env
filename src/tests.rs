@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 #[test]
 fn it_works() {
     #[derive(serde::Deserialize, Debug)]
@@ -16,16 +14,6 @@ fn it_works() {
 
     assert_eq!(test.a, "lorem ipsum");
     assert_eq!(test.b, 128);
-
-    let test = crate::from_env::<HashMap<String, String>>().unwrap();
-
-    assert_eq!(test.get("A").map(String::as_str), Some("lorem ipsum"));
-    assert_eq!(test.get("B").map(String::as_str), Some("128"));
-
-    let test = crate::from_env::<Vec<(String, String)>>().unwrap();
-
-    assert!(test.contains(&(String::from("A"), String::from("lorem ipsum"))));
-    assert!(test.contains(&(String::from("B"), String::from("128"))));
 }
 
 #[test]

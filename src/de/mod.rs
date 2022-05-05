@@ -146,27 +146,28 @@ where
 {
     type Error = Error;
 
-    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value>
+    fn deserialize_struct<V>(
+        self,
+        _name: &'static str,
+        _fields: &'static [&'static str],
+        visitor: V,
+    ) -> Result<V::Value>
     where
         V: serde::de::Visitor<'de>,
     {
         visitor.visit_map(&mut self.0)
     }
 
-    fn deserialize_seq<V>(self, visitor: V) -> Result<V::Value>
+    fn deserialize_newtype_struct<V>(self, _name: &'static str, visitor: V) -> Result<V::Value>
     where
-        V: serde::de::Visitor<'de>
+        V: serde::de::Visitor<'de>,
     {
-        visitor.visit_seq(&mut self.0)
-    }
-
-    serde::forward_to_deserialize_any! {
-        struct map newtype_struct ignored_any
+        visitor.visit_newtype_struct(self)
     }
 
     util::unsupported_types! {
         bool i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 char str string
         bytes byte_buf option unit unit_struct tuple
-        tuple_struct identifier enum
+        any tuple_struct identifier enum map seq ignored_any
     }
 }
