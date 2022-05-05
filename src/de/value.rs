@@ -1,18 +1,54 @@
-use std::ffi::OsString;
+use std::{
+    borrow::Cow,
+    ffi::{OsStr, OsString},
+};
 
 use serde::de::IntoDeserializer;
 
 use crate::{Error, Result};
 
-pub struct Value(OsString);
+pub struct Value<'de>(Cow<'de, OsStr>);
 
-impl From<OsString> for Value {
-    fn from(value: OsString) -> Self {
+impl<'de> From<Cow<'de, OsStr>> for Value<'de> {
+    fn from(value: Cow<'de, OsStr>) -> Self {
         Self(value)
     }
 }
 
-impl IntoDeserializer<'_, Error> for Value {
+impl<'de> From<&'de OsStr> for Value<'de> {
+    fn from(value: &'de OsStr) -> Self {
+        Self(Cow::Borrowed(value))
+    }
+}
+
+impl<'de> From<OsString> for Value<'de> {
+    fn from(value: OsString) -> Self {
+        Self(Cow::Owned(value))
+    }
+}
+
+impl<'de> From<Cow<'de, str>> for Value<'de> {
+    fn from(value: Cow<'de, str>) -> Self {
+        match value {
+            Cow::Owned(string) => Self(Cow::Owned(OsString::from(string))),
+            Cow::Borrowed(str) => Self(Cow::Borrowed(OsStr::new(str))),
+        }
+    }
+}
+
+impl<'de> From<&'de str> for Value<'de> {
+    fn from(value: &'de str) -> Self {
+        Self(Cow::Borrowed(OsStr::new(value)))
+    }
+}
+
+impl<'de> From<String> for Value<'de> {
+    fn from(value: String) -> Self {
+        Self(Cow::Owned(OsString::from(value)))
+    }
+}
+
+impl<'de> IntoDeserializer<'de, Error> for Value<'de> {
     type Deserializer = Self;
 
     fn into_deserializer(self) -> Self::Deserializer {
@@ -20,7 +56,7 @@ impl IntoDeserializer<'_, Error> for Value {
     }
 }
 
-macro_rules! convert_into_string_and_parse {
+macro_rules! validate_unicode_and_parse {
     ($($ty:ident)*) => {
         paste::paste! {
             $(
@@ -28,52 +64,46 @@ macro_rules! convert_into_string_and_parse {
                 where
                     V: serde::de::Visitor<'de>
                 {
-                    visitor.[<visit_ $ty>](
-                        self.0
-                            .into_string()
-                            .map_err(Error::invalid_unicode)?
-                            .parse::<$ty>()?
-                    )
+                    match self.0.to_str() {
+                        Some(str) => visitor.[<visit_ $ty>](str.parse::<$ty>()?),
+                        None => Err(Error::invalid_unicode(self.0.into_owned())),
+                    }
                 }
             )*
         }
     }
 }
 
-impl<'de> serde::de::Deserializer<'de> for Value {
+impl<'de> serde::de::Deserializer<'de> for Value<'de> {
     type Error = Error;
-
-    fn deserialize_string<V>(self, visitor: V) -> Result<V::Value>
-    where
-        V: serde::de::Visitor<'de>,
-    {
-        self.0
-            .into_string()
-            .map_err(Error::invalid_unicode)?
-            .into_deserializer()
-            .deserialize_string(visitor)
-    }
 
     fn deserialize_str<V>(self, visitor: V) -> Result<V::Value>
     where
         V: serde::de::Visitor<'de>,
     {
-        self.0
-            .into_string()
-            .map_err(Error::invalid_unicode)?
-            .into_deserializer()
-            .deserialize_str(visitor)
+        match self.0.to_str() {
+            Some(str) => visitor.visit_str(str),
+            None => Err(Error::invalid_unicode(self.0.into_owned())),
+        }
+    }
+
+    fn deserialize_string<V>(self, visitor: V) -> Result<V::Value>
+    where
+        V: serde::de::Visitor<'de>,
+    {
+        visitor.visit_string(
+            self.0
+                .into_owned()
+                .into_string()
+                .map_err(Error::invalid_unicode)?,
+        )
     }
 
     fn deserialize_char<V>(self, visitor: V) -> Result<V::Value>
     where
         V: serde::de::Visitor<'de>,
     {
-        self.0
-            .into_string()
-            .map_err(Error::invalid_unicode)?
-            .into_deserializer()
-            .deserialize_char(visitor)
+        self.deserialize_str(visitor)
     }
 
     fn deserialize_bool<V>(self, visitor: V) -> Result<V::Value>
@@ -86,14 +116,14 @@ impl<'de> serde::de::Deserializer<'de> for Value {
         match lowercase_input.as_deref() {
             Some("true" | "t" | "yes" | "y" | "on" | "1") => visitor.visit_bool(true),
             Some("false" | "f" | "no" | "n" | "off" | "0") => visitor.visit_bool(false),
-            _ => Err(Error::invalid_bool(self.0)),
+            _ => Err(Error::invalid_bool(self.0.into_owned())),
         }
 
         #[cfg(not(feature = "truthy-falsy"))]
         match lowercase_input.as_deref() {
             Some("true") => visitor.visit_bool(true),
             Some("false") => visitor.visit_bool(false),
-            _ => Err(Error::invalid_bool(self.0)),
+            _ => Err(Error::invalid_bool(self.0.into_owned())),
         }
     }
 
@@ -106,11 +136,12 @@ impl<'de> serde::de::Deserializer<'de> for Value {
     where
         V: serde::de::Visitor<'de>,
     {
-        self.0
-            .into_string()
-            .map_err(Error::invalid_unicode)?
-            .into_deserializer()
-            .deserialize_enum(name, variants, visitor)
+        match self.0.to_str() {
+            Some(str) => str
+                .into_deserializer()
+                .deserialize_enum(name, variants, visitor),
+            None => Err(Error::invalid_unicode(self.0.into_owned())),
+        }
     }
 
     fn deserialize_newtype_struct<V>(self, _name: &'static str, visitor: V) -> Result<V::Value>
@@ -134,7 +165,7 @@ impl<'de> serde::de::Deserializer<'de> for Value {
         visitor.visit_unit()
     }
 
-    convert_into_string_and_parse! {
+    validate_unicode_and_parse! {
         u8 u16 u32 u64 u128 i8 i16 i32 i64 i128 f32 f64
     }
 
@@ -146,7 +177,7 @@ impl<'de> serde::de::Deserializer<'de> for Value {
 
 #[cfg(test)]
 mod tests {
-    use std::ffi::OsString;
+    use std::ffi::OsStr;
 
     use serde::Deserialize;
 
@@ -164,7 +195,7 @@ mod tests {
 
         for value in truthy {
             assert!(matches!(
-                bool::deserialize(Value(OsString::from(value))),
+                bool::deserialize(Value::from(OsStr::new(value))),
                 Ok(true)
             ));
         }
@@ -179,12 +210,12 @@ mod tests {
 
         for value in falsy {
             assert!(matches!(
-                bool::deserialize(Value(OsString::from(value))),
+                bool::deserialize(Value::from(OsStr::new(value))),
                 Ok(false)
             ));
         }
 
-        assert!(bool::deserialize(Value(OsString::from("gibberish"))).is_err());
+        assert!(bool::deserialize(Value::from(OsStr::new("gibberish"))).is_err());
     }
 
     #[test]
@@ -199,18 +230,18 @@ mod tests {
         }
 
         assert!(matches!(
-            Switch::deserialize(Value(OsString::from("ON"))),
+            Switch::deserialize(Value::from(OsStr::new("ON"))),
             Ok(Switch::On)
         ));
 
         assert!(matches!(
-            Switch::deserialize(Value(OsString::from("OFF"))),
+            Switch::deserialize(Value::from(OsStr::new("OFF"))),
             Ok(Switch::Off)
         ));
 
-        assert!(Switch::deserialize(Value(OsString::from("NEW_TYPE_VARIANT"))).is_err());
-        assert!(Switch::deserialize(Value(OsString::from("STRUCT_VARIANT"))).is_err());
-        assert!(Switch::deserialize(Value(OsString::from("gibberish"))).is_err());
+        assert!(Switch::deserialize(Value::from(OsStr::new("NEW_TYPE_VARIANT"))).is_err());
+        assert!(Switch::deserialize(Value::from(OsStr::new("STRUCT_VARIANT"))).is_err());
+        assert!(Switch::deserialize(Value::from(OsStr::new("gibberish"))).is_err());
     }
 
     #[test]
@@ -219,7 +250,7 @@ mod tests {
         struct NewType(u8);
 
         assert!(matches!(
-            NewType::deserialize(Value(OsString::from("123"))),
+            NewType::deserialize(Value::from(OsStr::new("123"))),
             Ok(NewType(123))
         ));
     }

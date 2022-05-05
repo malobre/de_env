@@ -1,7 +1,5 @@
 #![allow(clippy::needless_doctest_main)]
 
-use std::ffi::OsString;
-
 use serde::{de::value::MapDeserializer, Deserialize};
 
 use crate::{Error, Result};
@@ -41,7 +39,7 @@ pub fn from_env<'de, T>() -> Result<T>
 where
     T: Deserialize<'de>,
 {
-    from_iter_os(std::env::vars_os())
+    from_iter(std::env::vars_os())
 }
 
 /// Deserialize an instance of `T` from the environment variables of the current process with the
@@ -74,15 +72,15 @@ pub fn from_env_prefixed<'de, T>(prefix: &str) -> Result<T>
 where
     T: Deserialize<'de>,
 {
-    from_iter_os(
+    from_iter(
         std::env::vars_os().filter_map(|(name, value)| match name.to_str() {
-            Some(name) => Some((OsString::from(name.strip_prefix(prefix)?), value)),
+            Some(name) => Some((std::ffi::OsString::from(name.strip_prefix(prefix)?), value)),
             _ => None,
         }),
     )
 }
 
-/// Deserialize an instance of `T` from an iterator of name-value `String` pairs.
+/// Deserialize an instance of `T` from an iterator of key-value tuple.
 ///
 /// # Example
 /// ```rust
@@ -95,51 +93,9 @@ where
 ///
 /// # std::env::set_var("LOG", "some value");
 /// # std::env::set_var("PORT", "2345");
-/// // You can use any iterator over a `(String, String)` tuple.
-/// let vars = std::env::vars().filter(|(name, _value)| name == "LOG" || name == "PORT");
-///
-/// let config: Config = de_env::from_iter(vars)?;
-///
-/// println!("{config:#?}");
-/// # Ok::<(), de_env::Error>(())
-/// ```
-///
-/// # Errors
-/// This conversion can fail if trying to deserialize [unsupported types], or if `T`'s
-/// implementation of `Deserialize` decides that something is wrong with the data.
-///
-/// [unsupported types]: crate#unsupported-types
-pub fn from_iter<'de, T>(iter: impl Iterator<Item = (String, String)>) -> Result<T>
-where
-    T: Deserialize<'de>,
-{
-    let mut deserializer = EnvDeserializer::from_iter(iter.map(|(key, value)| {
-        (
-            Key::from(OsString::from(key)),
-            Value::from(OsString::from(value)),
-        )
-    }));
-
-    T::deserialize(&mut deserializer)
-}
-
-/// Deserialize an instance of `T` from an iterator of name-value `OsString` pairs.
-///
-/// # Example
-/// ```rust
-/// #[derive(serde::Deserialize, Debug)]
-/// #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-/// struct Config {
-///     log: String,
-///     port: u16
-/// }
-///
-/// # std::env::set_var("LOG", "some value");
-/// # std::env::set_var("PORT", "2345");
-/// // You can use any iterator over a `(OsString, OsString)` tuple.
 /// let vars = std::env::vars_os().filter(|(name, _value)| name == "LOG" || name == "PORT");
 ///
-/// let config: Config = de_env::from_iter_os(vars).unwrap();
+/// let config: Config = de_env::from_iter(vars).unwrap();
 ///
 /// println!("{config:#?}");
 /// # Ok::<(), de_env::Error>(())
@@ -149,22 +105,35 @@ where
 /// This conversion can fail if trying to deserialize [unsupported types], or if `T`'s
 /// implementation of `Deserialize` decides that something is wrong with the data.
 ///
+/// # Iterator Items
+/// The items must be a tuple of 2 elements that are of the following types:
+/// - [`OsString`](std::ffi::OsString)
+/// - [`String`]
+/// - [`Cow<str>`](std::borrow::Cow)
+/// - [`Cow<OsStr>`](std::borrow::Cow)
+/// - [`&OsStr`](std::ffi::OsStr)
+/// - [`&str`]
+///
 /// [unsupported types]: crate#unsupported-types
-pub fn from_iter_os<'de, T>(iter: impl Iterator<Item = (OsString, OsString)>) -> Result<T>
+pub fn from_iter<'de, T>(
+    iter: impl Iterator<Item = (impl Into<Key<'de>>, impl Into<Value<'de>>)>,
+) -> Result<T>
 where
     T: Deserialize<'de>,
 {
     let mut deserializer =
-        EnvDeserializer::from_iter(iter.map(|(key, value)| (Key::from(key), Value::from(value))));
+        EnvDeserializer::from_iter(iter.map(|(key, value)| (key.into(), value.into())));
 
     T::deserialize(&mut deserializer)
 }
 
-struct EnvDeserializer<'de, I: Iterator<Item = (Key, Value)>>(MapDeserializer<'de, I, Error>);
+struct EnvDeserializer<'de, I: Iterator<Item = (Key<'de>, Value<'de>)>>(
+    MapDeserializer<'de, I, Error>,
+);
 
 impl<'de, I> EnvDeserializer<'de, I>
 where
-    I: Iterator<Item = (Key, Value)>,
+    I: Iterator<Item = (Key<'de>, Value<'de>)>,
 {
     pub fn from_iter(iter: I) -> Self {
         Self(MapDeserializer::new(iter))
@@ -173,7 +142,7 @@ where
 
 impl<'de, 'a, I> serde::de::Deserializer<'de> for &'a mut EnvDeserializer<'de, I>
 where
-    I: Iterator<Item = (Key, Value)>,
+    I: Iterator<Item = (Key<'de>, Value<'de>)>,
 {
     type Error = Error;
 
