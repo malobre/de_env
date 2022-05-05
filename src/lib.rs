@@ -62,27 +62,25 @@
 //!
 //! **Only unit variants can be deserialized.**
 //!
-//! Assuming we have a `LEVEL` environment variable set to `HIGH`, `MEDIUM` or
-//! `LOW`:
+//! Assuming we have a `LOG_LEVEL` environment variable set to `INFO` or `WARN`:
 //!
 //! ```rust,no_run
 //! #[derive(serde::Deserialize, Debug)]
 //! #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 //! enum Level {
-//!     High,
-//!     Medium,
-//!     Low
+//!     Info,
+//!     Warn
 //! }
 //!
 //! #[derive(serde::Deserialize, Debug)]
 //! #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-//! struct Pool {
-//!     level: Level,
+//! struct Config {
+//!     log_level: Level,
 //! }
 //!
-//! let pool: Pool = de_env::from_env()?;
+//! let config: Config = de_env::from_env()?;
 //!
-//! println!("{pool:#?}");
+//! println!("{config:#?}");
 //! # Ok::<(), de_env::Error>(())
 //! ```
 //!

@@ -7,6 +7,7 @@ _**De**serialize **env**ironment variables through serde._
 You may be looking for:
 
 - [API Documentation](https://docs.rs/de_env)
+- [Examples](https://docs.rs/de_env/#example)
 - [Crates.io](https://crates.io/crates/de_env)
 
 ## License

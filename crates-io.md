@@ -1,8 +1,20 @@
-_**De**serialize **env**ironment variables through serde._
+`de_env` helps you easily **de**serialize **env**ironment variables to a struct,
+a map or a seq (array, `Vec`, etc).
 
----
+## Example
 
-You may be looking for:
+Assuming we have a `TIMEOUT`, `HOST` and `RETRY` environment variable:
 
-- [API Documentation](https://docs.rs/de_env)
-- [Git repository](https://github.com/malobre/de_env)
+```rust
+#[derive(serde::Deserialize, Debug)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+struct Config {
+    timeout: u16,
+    host: std::net::IpAddr,
+    retry: bool,
+}
+
+let config: Config = de_env::from_env()?;
+
+println!("{config:#?}");
+```
