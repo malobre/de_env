@@ -93,3 +93,7 @@ println!("{pool:#?}");
 - Tuples
 - Sequences
 - Byte Arrays
+
+## License
+
+Licensed under [MIT license](LICENSE).
