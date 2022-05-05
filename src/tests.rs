@@ -63,3 +63,24 @@ fn prefixed() {
     assert_eq!(test_struct.a, "lorem ipsum");
     assert_eq!(test_struct.b, 128);
 }
+
+#[test]
+fn newtype() {
+    #[derive(serde::Deserialize, Debug)]
+    #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+    struct Test {
+        a: String,
+        b: u8,
+    }
+
+    #[derive(serde::Deserialize, Debug)]
+    struct NewType(Test);
+
+    std::env::set_var("A", "lorem ipsum");
+    std::env::set_var("B", "128");
+
+    let test = crate::from_env::<NewType>().unwrap();
+
+    assert_eq!(test.0.a, "lorem ipsum");
+    assert_eq!(test.0.b, 128);
+}
