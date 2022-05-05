@@ -89,9 +89,9 @@
 //! - Nested structs
 //! - Nested enums
 //! - Nested maps
+//! - Nested sequences
 //! - Non-unit enum variants
 //! - Tuples
-//! - Sequences
 //! - Byte Arrays
 
 mod de;
