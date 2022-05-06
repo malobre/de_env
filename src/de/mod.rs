@@ -13,17 +13,19 @@ mod value;
 /// Deserialize an instance of `T` from the environment variables of the current process.
 ///
 /// # Example
-/// Assuming we have a `LOG` and `PORT` environment variable:
+///
+/// Assuming we have a `TIMEOUT` and `HOST` environment variable:
+///
 /// ```rust
 /// #[derive(serde::Deserialize, Debug)]
 /// #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// struct Config {
-///     log: String,
-///     port: u16
+///     timeout: u16,
+///     host: std::net::IpAddr,
 /// }
 ///
-/// # std::env::set_var("LOG", "some value");
-/// # std::env::set_var("PORT", "2345");
+/// # std::env::set_var("TIMEOUT", "12");
+/// # std::env::set_var("HOST", "127.0.0.1");
 /// let config: Config = de_env::from_env()?;
 ///
 /// println!("{config:#?}");
@@ -46,17 +48,19 @@ where
 /// specified prefix.
 ///
 /// # Example
-/// Assuming we have a `PREFIX_LOG` and `PREFIX_PORT` environment variable:
+///
+/// Assuming we have a `PREFIX_TIMEOUT` and `PREFIX_HOST` environment variable:
+///
 /// ```rust
 /// #[derive(serde::Deserialize, Debug)]
 /// #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// struct Config {
-///     log: String,
-///     port: u16
+///     timeout: u16,
+///     host: std::net::IpAddr,
 /// }
 ///
-/// # std::env::set_var("PREFIX_LOG", "some value");
-/// # std::env::set_var("PREFIX_PORT", "2345");
+/// # std::env::set_var("PREFIX_TIMEOUT", "12");
+/// # std::env::set_var("PREFIX_HOST", "127.0.0.1");
 /// let config: Config = de_env::from_env_prefixed("PREFIX_")?;
 ///
 /// println!("{config:#?}");
@@ -82,18 +86,21 @@ where
 
 /// Deserialize an instance of `T` from an iterator of key-value tuple.
 ///
+/// This is intended to be used when you wish to perform some operation, such as mapping or
+/// filtering, on the iterator returned by [`std::env::vars()`] or [`std::env::vars_os()`].
+///
 /// # Example
 /// ```rust
 /// #[derive(serde::Deserialize, Debug)]
 /// #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
 /// struct Config {
-///     log: String,
-///     port: u16
+///     timeout: u16,
+///     host: std::net::IpAddr,
 /// }
 ///
-/// # std::env::set_var("LOG", "some value");
-/// # std::env::set_var("PORT", "2345");
-/// let vars = std::env::vars_os().filter(|(name, _value)| name == "LOG" || name == "PORT");
+/// # std::env::set_var("TIMEOUT", "12");
+/// # std::env::set_var("HOST", "127.0.0.1");
+/// let vars = std::env::vars_os().filter(|(name, _value)| name == "TIMEOUT" || name == "HOST");
 ///
 /// let config: Config = de_env::from_iter(vars)?;
 ///
@@ -106,7 +113,8 @@ where
 /// implementation of `Deserialize` decides that something is wrong with the data.
 ///
 /// # Iterator Items
-/// The items must be a tuple of 2 elements that are of the following types:
+/// The items must be a tuple of length 2, where the first element is the key and the second the
+/// value. The elements may be of the following types:
 /// - [`OsString`](std::ffi::OsString)
 /// - [`String`]
 /// - [`Cow<str>`](std::borrow::Cow)
