@@ -1,6 +1,6 @@
 [package]
 name = "de_env"
-version = "1.0.0-rc.2"
+version = "1.0.0"
 description = "Deserialize environment variables into a struct"
 authors = ["Maël Obréjan <mael.obrejan@protonmail.com>"]
 edition = "2021"
