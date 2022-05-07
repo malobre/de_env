@@ -29,14 +29,14 @@
 //! # Ok::<(), de_env::Error>(())
 //! ```
 //!
-//! ## Primitives
+//! ## Supported Primitives
 //!
-//! ### Numbers
+//! - String slices
+//! - Chars
+//! - Numbers (parsed with their respective [`FromStr`](std::str::FromStr) implementations)
+//! - Booleans (see [boolean parsing](#boolean-parsing))
 //!
-//! If the input is valid Unicode, integers and floats are parsed with their
-//! respective [`FromStr`](std::str::FromStr) implementations.
-//!
-//! ### Booleans
+//! ## Boolean Parsing
 //!
 //! **Boolean parsing is case-insensitive.**
 //!
@@ -82,6 +82,13 @@
 //! println!("{config:#?}");
 //! # Ok::<(), de_env::Error>(())
 //! ```
+//!
+//! ## Unsupported Types
+//!
+//! The goal of this crate is to deserialize environment variables into a **struct**, no other type
+//! is supported at top level. Custom types must be able to deserialize from [supported primitives].
+//!
+//! [supported primitives]: #supported-primitives
 
 mod de;
 mod error;
